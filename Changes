@@ -1,5 +1,9 @@
 Revision history for Perl extension Apache::AxKit::Provider::File::Syntax
 
+0.06  Tue Dec 14 14:08:10 PST 2004
+  - Added <syn:Line> wrapper around lines
+  - Added attribute to <syn:syntax> to indicate the file type
+
 0.05  Fri Jul 16 04:10:59 PDT 2004
   - Fixed a stupid bug in the Makefile.PL
 

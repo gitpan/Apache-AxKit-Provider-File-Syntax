@@ -1,4 +1,4 @@
-# $Id: Syntax.pm,v 1.8 2004/07/16 17:07:54 nachbaur Exp $
+# $Id: Syntax.pm,v 1.7 2004/07/16 04:40:56 nachbaur Exp $
 
 package Apache::AxKit::Provider::File::Syntax;
 use strict;
@@ -6,7 +6,7 @@ use vars qw/@ISA/;
 use Apache::AxKit::Provider::File;
 @ISA = ('Apache::AxKit::Provider::File');
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 our $noMimeInfo = 0;    # unless told otherwise, we use File::MimeInfo::Magic
 
 use Apache;
@@ -51,17 +51,36 @@ sub get_strref {
         $syntax = new Text::VimColor(
             file => $self->{file},
             filetype => $filetype,
+            xml_root_element => 0, # We'll add the root ourselves
         );
     } else {
         # either the filetype is empty or set to 'plain'
         # in both cases, we let VimColor take care of
         # figuring out what kind of file this is
-        $syntax = new Text::VimColor( file => $self->{file} );
+        $syntax = new Text::VimColor(
+            file => $self->{file},
+            xml_root_element => 0, # We'll add the root ourselves
+        );
     }
 
     # Fetch the XML and return it
-    $self->{data} = $syntax->xml;
-    $self->{data} =~ s/>>/>/; # Trim off the > that Text::VimColor always seems to add
+    my $data = $syntax->xml;
+
+    # Trim off the > that Text::VimColor always seems to add
+    $data =~ s/>>/>/;
+
+    # Add <syn:line> tags, since it would be nice to have
+    my $filename = $self->{file};
+    $self->{data} = qq{<?xml version="1.0"?>\n<syn:syntax xmlns:syn="http://ns.laxan.com/text-vimcolor/1"};
+    $self->{data} .= qq{ type="$filetype"} if ($filetype);
+    $self->{data} .= qq{ filename="$filename">};
+    my $line_number = 0;
+    foreach my $line (split(/\n/, $data)) {
+        $line_number++;
+        $self->{data} .= qq{<syn:Line number="$line_number">$line$1</syn:Line>};
+    }
+    $self->{data} .= qq{</syn:syntax>};
+
     return \$$self{data};
 }
 
