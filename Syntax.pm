@@ -1,4 +1,4 @@
-# $Id: Syntax.pm,v 1.5 2004/07/15 17:04:47 nachbaur Exp $
+# $Id: Syntax.pm,v 1.6 2004/07/16 04:34:50 nachbaur Exp $
 
 package Apache::AxKit::Provider::File::Syntax;
 use strict;
@@ -6,7 +6,8 @@ use vars qw/@ISA/;
 use Apache::AxKit::Provider::File;
 @ISA = ('Apache::AxKit::Provider::File');
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
+our $noMimeInfo = 0;    # unless told otherwise, we use File::MimeInfo::Magic
 
 use Apache;
 use Apache::Log;
@@ -14,10 +15,13 @@ use Apache::Constants qw(HTTP_OK);
 use Apache::AxKit::Exception;
 use Apache::AxKit::Provider;
 use Text::VimColor;
-use File::MimeInfo::Magic qw( mimetype );
 use AxKit;
 use File::Spec;
 use Fcntl qw(O_RDONLY LOCK_SH);
+
+# see if we can use File::MimeInfo::Magic
+eval "use File::MimeInfo::Magic qw( mimetype )";
+$noMimeInfo = 1 if $@;
 
 #
 # We can't output a filehandle, so throw the necessary exception
@@ -40,9 +44,10 @@ sub get_strref {
     }
 
     # Process the file with Text::VimColor
-	my $filetype = $self->_resolve_type;
+	my $filetype = '';
+    $filetype = $self->_resolve_type unless $noMimeInfo;
 	my $syntax = undef;
-	if ($filetype and $filetype ne 'plain') {
+	if ($filetype) {
         $syntax = new Text::VimColor(
             file => $self->{file},
             filetype => $filetype,
@@ -64,7 +69,13 @@ sub _resolve_type {
     my ($self) = shift;
     # Figure out the mime-type, and rip it apart to determine
     # what VIM syntax file this should use
-    my $filetype = my $mimetype = mimetype($self->{file});
+    my $mimetype = mimetype($self->{file}); 
+    $mimetype = '' if $mimetype eq 'text/plain';  # I don't believe you!
+    if ($mimetype) { 
+        AxKit::Debug(8, "MimeInfo::Magic recognized file as '$mimetype'"); 
+    }
+    # reformating for VimColor
+    my $filetype = $mimetype;
     $filetype =~ s/^(?:application|text)\/(?:x\-)?(.*)$/$1/;
     $filetype = 'xml' if $filetype eq 'rdf';
     return $filetype;
