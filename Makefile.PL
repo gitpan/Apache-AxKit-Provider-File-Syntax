@@ -1,6 +1,6 @@
-# $Id: Makefile.PL,v 1.2 2004/07/16 04:34:50 nachbaur Exp $
+# $Id: Makefile.PL,v 1.3 2004/07/16 17:07:54 nachbaur Exp $
 use strict;
-use ExtUtils::MakeMaker qw(prompt);
+use ExtUtils::MakeMaker;
 eval { require ExtUtils::AutoInstall };
 
 if ($ExtUtils::AutoInstall::VERSION > 0) {

@@ -1,5 +1,8 @@
 Revision history for Perl extension Apache::AxKit::Provider::File::Syntax
 
+0.05  Fri Jul 16 04:10:59 PDT 2004
+  - Fixed a stupid bug in the Makefile.PL
+
 0.04  Thu Jul 15 21:08:26 PDT 2004
   - More changes from Yanick, this time making File::MimeInfo optional
   - Adopted ExtUtils::AutoInstall to accomodate installing File::MimeInfo if

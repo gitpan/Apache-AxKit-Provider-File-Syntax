@@ -1,4 +1,4 @@
-# $Id: Syntax.pm,v 1.6 2004/07/16 04:34:50 nachbaur Exp $
+# $Id: Syntax.pm,v 1.8 2004/07/16 17:07:54 nachbaur Exp $
 
 package Apache::AxKit::Provider::File::Syntax;
 use strict;
@@ -6,7 +6,7 @@ use vars qw/@ISA/;
 use Apache::AxKit::Provider::File;
 @ISA = ('Apache::AxKit::Provider::File');
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 our $noMimeInfo = 0;    # unless told otherwise, we use File::MimeInfo::Magic
 
 use Apache;
