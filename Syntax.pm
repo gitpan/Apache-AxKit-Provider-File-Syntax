@@ -1,4 +1,4 @@
-# $Id: Syntax.pm,v 1.4 2004/07/14 12:15:31 nachbaur Exp $
+# $Id: Syntax.pm,v 1.5 2004/07/15 17:04:47 nachbaur Exp $
 
 package Apache::AxKit::Provider::File::Syntax;
 use strict;
@@ -6,7 +6,7 @@ use vars qw/@ISA/;
 use Apache::AxKit::Provider::File;
 @ISA = ('Apache::AxKit::Provider::File');
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 use Apache;
 use Apache::Log;
@@ -40,10 +40,19 @@ sub get_strref {
     }
 
     # Process the file with Text::VimColor
-    my $syntax = new Text::VimColor(
-        file => $self->{file},
-        filetype => $self->_resolve_type,
-    );
+	my $filetype = $self->_resolve_type;
+	my $syntax = undef;
+	if ($filetype and $filetype ne 'plain') {
+        $syntax = new Text::VimColor(
+            file => $self->{file},
+            filetype => $filetype,
+        );
+    } else {
+        # either the filetype is empty or set to 'plain'
+        # in both cases, we let VimColor take care of
+        # figuring out what kind of file this is
+        $syntax = new Text::VimColor( file => $self->{file} );
+    }
 
     # Fetch the XML and return it
     $self->{data} = $syntax->xml;
